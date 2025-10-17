@@ -1,4 +1,4 @@
-<img width="1280" height="640" alt="Z-Shark" src="https://github.com/user-attachments/assets/50e3c790-a312-4969-86e9-db38ba42b55e" />
+<img width="1280" height="342" alt="Z-Shark" src="https://github.com/user-attachments/assets/2c821938-4424-45ff-8964-eb0c14b6022c" />
 
 # Z-Shark: The World-Class Packet Analysis Platform
 
