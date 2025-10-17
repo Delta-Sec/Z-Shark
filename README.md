@@ -1,3 +1,5 @@
+<img width="1280" height="640" alt="Z-Shark" src="https://github.com/user-attachments/assets/50e3c790-a312-4969-86e9-db38ba42b55e" />
+
 # Z-Shark: The World-Class Packet Analysis Platform
 
 **CLI-first. Mathematical Models first. Fully Integrated.**
@@ -30,43 +32,27 @@ Z-Shark is a high-performance, extensible platform for deep packet analysis, foc
 
 2.  **Install dependencies:**
     ```bash
-    poetry install
-    ```
-
-3.  **Run the CLI:**
-    The main entry point is `zshark`. You can run it via Poetry:
-    ```bash
-    poetry run zshark --help
+    python -m venv .venv
+    source venv/bin/activate
+    pip install -r requirements.txt
     ```
 
 ### Example Usage
 
 1.  **Analyze a PCAP file:**
     ```bash
-    poetry run zshark analyze input.pcap --out results/ --profile high-sensitivity
+    python -m zshark.cli.main.py analyze input.pcap --out results/ --profile high-sensitivity
     ```
 
 2.  **Generate a detailed PDF report:**
     ```bash
-    poetry run zshark report results/analysis.json --pdf report.pdf
+    python -m zshark.cli.main.py report results/analysis.json --pdf report.pdf
     ```
 
 3.  **Get a quick summary:**
     ```bash
-    poetry run zshark summary input.pcap --top 10
+    python -m zshark.cli.main.py summary input.pcap --top 10
     ```
-
-## 🐳 Deployment (Docker)
-
-A `Dockerfile` is provided to easily containerize Z-Shark for deployment in cloud environments or on dedicated analysis servers.
-
-```bash
-# Build the image
-docker build -t zshark:latest .
-
-# Run a quick analysis
-docker run --rm -v /path/to/pcaps:/data zshark:latest analyze /data/input.pcap --out /data/results/
-```
 
 ## 🛠️ Architecture
 
