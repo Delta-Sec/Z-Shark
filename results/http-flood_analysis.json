@@ -1,0 +1,180 @@
+{
+    "pcap_path": "/home/kali/Desktop/Z-Shark/sample_pcaps/http-flood.pcap",
+    "start_time": "2018-08-02T07:30:52.877841",
+    "end_time": "2018-08-02T07:31:14.938713",
+    "total_packets": 2431,
+    "total_bytes": 950783,
+    "detections": [
+        {
+            "model_name": "DDoSDetector",
+            "timestamp": "2018-08-02T07:31:02.871760",
+            "severity": 1.0,
+            "score": 96.26462062391361,
+            "label": "High Volume Anomaly (DDoS Suspect)",
+            "justification": "PPS Z-score 96.26 exceeds threshold 5.00.",
+            "evidence": {
+                "current_pps": 106.26462062391361,
+                "mean_pps": 10.0,
+                "pps_z_score": 96.26462062391361
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "DDoSDetector",
+            "timestamp": "2018-08-02T07:31:02.871760",
+            "severity": 0.8045449840746057,
+            "score": 0.9772750796269715,
+            "label": "Source IP Entropy Collapse (DDoS Suspect)",
+            "justification": "Source IP entropy dropped to 0.98, 80.5% below mean 5.00.",
+            "evidence": {
+                "current_entropy": 0.9772750796269715,
+                "mean_entropy": 5.0
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "PortScanDetector",
+            "timestamp": "2018-08-02T07:31:02.871760",
+            "severity": 1.0,
+            "score": 89.0,
+            "label": "Port Scan Suspect",
+            "justification": "Source IP 10.128.0.2 accessed 89 unique ports with 437 packets.",
+            "evidence": {
+                "source_ip": "10.128.0.2",
+                "unique_ports": 89,
+                "total_packets": 437
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "DDoSDetector",
+            "timestamp": "2018-08-02T07:31:12.802236",
+            "severity": 0.7669222301342886,
+            "score": 0.9778672986838035,
+            "label": "Source IP Entropy Collapse (DDoS Suspect)",
+            "justification": "Source IP entropy dropped to 0.98, 76.7% below mean 4.20.",
+            "evidence": {
+                "current_entropy": 0.9778672986838035,
+                "mean_entropy": 4.195455015925394
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "PortScanDetector",
+            "timestamp": "2018-08-02T07:31:12.802236",
+            "severity": 1.0,
+            "score": 100.0,
+            "label": "Port Scan Suspect",
+            "justification": "Source IP 10.128.0.2 accessed 100 unique ports with 470 packets.",
+            "evidence": {
+                "source_ip": "10.128.0.2",
+                "unique_ports": 100,
+                "total_packets": 470
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "DDoSDetector",
+            "timestamp": "2018-08-02T07:31:14.938713",
+            "severity": 0.7115709944657685,
+            "score": 0.978070970973496,
+            "label": "Source IP Entropy Collapse (DDoS Suspect)",
+            "justification": "Source IP entropy dropped to 0.98, 71.2% below mean 3.39.",
+            "evidence": {
+                "current_entropy": 0.978070970973496,
+                "mean_entropy": 3.391028475662155
+            },
+            "flow_key": null
+        },
+        {
+            "model_name": "PortScanDetector",
+            "timestamp": "2018-08-02T07:31:14.938713",
+            "severity": 0.5,
+            "score": 20.0,
+            "label": "Port Scan Suspect",
+            "justification": "Source IP 10.128.0.2 accessed 20 unique ports with 95 packets.",
+            "evidence": {
+                "source_ip": "10.128.0.2",
+                "unique_ports": 20,
+                "total_packets": 95
+            },
+            "flow_key": null
+        }
+    ],
+    "summary_stats": {
+        "total_packets": 2431,
+        "total_bytes": 950783
+    },
+    "model_stats": {},
+    "window_stats": [
+        {
+            "start_time": "2018-08-02T07:30:52.877841",
+            "end_time": "2018-08-02T07:31:02.871760",
+            "packet_count": 1062,
+            "total_bytes": 427189,
+            "pps": 106.26462062391361,
+            "bps": 341959.1489243618,
+            "src_ip_entropy": 0.9772750796269715,
+            "dst_ip_entropy": 0.9772750796269715
+        },
+        {
+            "start_time": "2018-08-02T07:31:02.955795",
+            "end_time": "2018-08-02T07:31:12.802236",
+            "packet_count": 1139,
+            "total_bytes": 436226,
+            "pps": 115.67631355040915,
+            "bps": 354423.2874791275,
+            "src_ip_entropy": 0.9778672986838035,
+            "dst_ip_entropy": 0.9778672986838035
+        },
+        {
+            "start_time": "2018-08-02T07:31:13.394514",
+            "end_time": "2018-08-02T07:31:14.938713",
+            "packet_count": 230,
+            "total_bytes": 87368,
+            "pps": 148.94453468049232,
+            "bps": 452625.603685748,
+            "src_ip_entropy": 0.978070970973496,
+            "dst_ip_entropy": 0.978070970973496
+        }
+    ],
+    "top_source_ips": [
+        {
+            "ip": "10.0.0.2",
+            "packets": 1429,
+            "bytes": 139922
+        },
+        {
+            "ip": "10.128.0.2",
+            "packets": 1002,
+            "bytes": 810861
+        }
+    ],
+    "top_dest_ports": [
+        {
+            "port": 80,
+            "packets": 1429,
+            "bytes": 139922
+        },
+        {
+            "port": 37361,
+            "packets": 7,
+            "bytes": 7255
+        },
+        {
+            "port": 37368,
+            "packets": 7,
+            "bytes": 7255
+        },
+        {
+            "port": 37369,
+            "packets": 7,
+            "bytes": 7255
+        },
+        {
+            "port": 37362,
+            "packets": 6,
+            "bytes": 7189
+        }
+    ]
+}
