@@ -17,13 +17,13 @@
 <details>
 <summary><strong>Table of Contents</strong></summary>
 <ol>
-<li><a href="#--legal-disclaimer-use-responsibly">Legal Disclaimer</a></li>
-<li><a href="#--architectural-philosophy-math-over-signatures">Architectural Philosophy</a></li>
-<li><a href="#--detection-engines-feature-deep-dive">Detection Engines (Deep Dive)</a></li>
-<li><a href="#--system-architecture-and-data-flow">System Architecture</a></li>
-<li><a href="#--installation-and-setup">Installation & Setup</a></li>
-<li><a href="#--usage-guide">Usage Guide</a></li>
-<li><a href="#--license">License</a></li>
+<li><a href="#--%EF%B8%8F-legal-disclaimer-use-responsibly">Legal Disclaimer</a></li>
+<li><a href="#---architectural-philosophy-math-over-signatures">Architectural Philosophy</a></li>
+<li><a href="#--%EF%B8%8F-detection-engines-feature-deep-dive">Detection Engines (Deep Dive)</a></li>
+<li><a href="#--%EF%B8%8F-system-architecture-and-data-flow">System Architecture</a></li>
+<li><a href="#-%EF%B8%8F-installation-and-setup-">Installation & Setup</a></li>
+<li><a href="#--usage-guide-">Usage Guide</a></li>
+<li><a href="#-%EF%B8%8F-license-">License</a></li>
 </ol>
 </details>
 
