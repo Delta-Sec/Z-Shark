@@ -4,6 +4,7 @@ from scapy.all import Packet, ARP
 from zshark.models.base import BaseDetectionModel
 from zshark.core.data_structures import Detection, WindowStats, ModelConfig
 import time
+from datetime import datetime
 
 class ARPSpoofDetector(BaseDetectionModel):
     def __init__(self, config: ModelConfig):
