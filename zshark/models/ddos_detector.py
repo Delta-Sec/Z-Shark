@@ -13,6 +13,11 @@ class DDoSDetector(BaseDetectionModel):
         self.pps_history = deque(maxlen=self.history_size)
         self.entropy_history = deque(maxlen=self.history_size)     
 
+    def set_global_baseline(self, avg_pps: float):
+        if avg_pps > 0:
+            for _ in range(20):
+                self.pps_history.append(avg_pps)
+
     def update_baseline(self, window_stats: WindowStats, window_packets: List[Packet]) -> None:
         try:
             curr_pps = float(getattr(window_stats, "pps", 0.0))
@@ -34,22 +39,6 @@ class DDoSDetector(BaseDetectionModel):
 
         current_pps = self.pps_history[-1] if self.pps_history else 0.0
         current_entropy = self.entropy_history[-1] if self.entropy_history else 0.0
-
-        # --- FIX: Handle Cold Start (First 20 Windows) ---
-        if len(self.pps_history) < 20:
-            # Static Threshold Fallback
-            STATIC_PPS_THRESHOLD = 2000.0 
-            if current_pps > STATIC_PPS_THRESHOLD:
-                detections.append(Detection(
-                    model_name=self.model_name,
-                    timestamp=getattr(window_stats, "end_time", None),
-                    severity=1.0,
-                    score=current_pps,
-                    label="High Volume Anomaly (Static Threshold)",
-                    justification=f"Immediate Spike detected: {current_pps:.1f} PPS (Cold Start)",
-                    evidence={"current_pps": current_pps, "threshold": STATIC_PPS_THRESHOLD}
-                ))
-            return detections
 
         pps_list = list(self.pps_history)[:-1]
         if not pps_list: return detections

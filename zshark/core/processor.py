@@ -8,7 +8,6 @@ from zshark.models import load_models
 from collections import defaultdict
 from scapy.layers.inet import IP, TCP, UDP
 
-
 class PacketStreamer:
     def __init__(self, pcap_path: str):
         self.pcap_path = pcap_path
@@ -24,12 +23,9 @@ class PacketStreamer:
 
 class WindowProcessor:
     def __init__(self, config: ZSharkConfig):
-        self.max_window_packets = 10000 
-        
         self.window_size = config.models.get("ddos_volume", ZSharkConfig.default().models["ddos_volume"]).window_size_s
         self.current_window: List[Packet] = []
         self.window_start_time: Optional[float] = None
-        self.dropped_packets_count = 0
 
     def process_stream(self, packet_stream: Iterator[Packet]) -> Iterator[Tuple[WindowStats, List[Packet]]]:
         for pkt in packet_stream:
@@ -42,29 +38,18 @@ class WindowProcessor:
                 self.window_start_time = pkt_time
 
             if pkt_time >= self.window_start_time + self.window_size:
-
                 if self.current_window:
                     stats_dict = calculate_window_stats(self.current_window)
                     stats_dict['start_time'] = datetime.fromtimestamp(self.window_start_time).isoformat()
                     stats_dict['end_time'] = datetime.fromtimestamp(self.window_start_time + self.window_size).isoformat()
                     
-                  
-                    if self.dropped_packets_count > 0:
-                        logger.warning(f"Window overloaded! Dropped {self.dropped_packets_count} packets to save RAM.")
-                    
                     stats = WindowStats(**stats_dict)
                     yield (stats, self.current_window)
-                
 
                 self.current_window = [pkt]
                 self.window_start_time = pkt_time
-                self.dropped_packets_count = 0
             else:
-
-                if len(self.current_window) < self.max_window_packets:
-                    self.current_window.append(pkt)
-                else:
-                    self.dropped_packets_count += 1
+                self.current_window.append(pkt)
 
         if self.current_window and self.window_start_time is not None:
             stats_dict = calculate_window_stats(self.current_window)
@@ -79,8 +64,33 @@ class Analyzer:
         self.window_processor = WindowProcessor(config)
         self.detection_models = load_models(config)
     
+    def get_global_baseline(self, pcap_path: str) -> float:
+        streamer = PacketStreamer(pcap_path)
+        packet_count = 0
+        start_time = None
+        end_time = None
+        
+        for pkt in streamer.stream():
+            try:
+                ts = float(pkt.time)
+                if start_time is None: start_time = ts
+                end_time = ts
+                packet_count += 1
+            except:
+                continue
+            
+        if start_time and end_time and end_time > start_time:
+            duration = end_time - start_time
+            return packet_count / duration
+        return 0.0
+
     def analyze_pcap(self, pcap_path: str) -> AnalysisResult:
-       
+        global_avg_pps = self.get_global_baseline(pcap_path)
+        
+        for model in self.detection_models:
+            if hasattr(model, 'set_global_baseline'):
+                model.set_global_baseline(global_avg_pps)
+
         streamer = PacketStreamer(pcap_path)
         packet_stream = streamer.stream()
   
