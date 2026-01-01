@@ -26,7 +26,6 @@ class PacketStreamer:
 
 
 class WindowProcessor:
-
     def __init__(self, config: ZSharkConfig):
         self.window_size = config.models.get("ddos_volume", ZSharkConfig.default().models["ddos_volume"]).window_size_s
         self.current_window: List[Packet] = []
@@ -34,29 +33,32 @@ class WindowProcessor:
 
     def process_stream(self, packet_stream: Iterator[Packet]) -> Iterator[Tuple[WindowStats, List[Packet]]]:
         for pkt in packet_stream:
-            pkt_time = float(pkt.time)
+            try:
+                pkt_time = float(pkt.time)
+            except Exception:
+                continue
 
             if self.window_start_time is None:
                 self.window_start_time = pkt_time
 
-            if pkt_time < self.window_start_time + self.window_size:
-                self.current_window.append(pkt)
-            else:
+            if pkt_time >= self.window_start_time + self.window_size:
+           
                 if self.current_window:
                     stats_dict = calculate_window_stats(self.current_window)
-                    stats_dict['start_time'] = stats_dict['start_time'].isoformat()
-                    stats_dict['end_time'] = stats_dict['end_time'].isoformat()
+                    stats_dict['start_time'] = datetime.fromtimestamp(self.window_start_time).isoformat()
+                    stats_dict['end_time'] = datetime.fromtimestamp(self.window_start_time + self.window_size).isoformat()
                     stats = WindowStats(**stats_dict)
                     yield (stats, self.current_window)
-
+                
                 self.current_window = [pkt]
-                self.window_start_time = self.window_start_time + self.window_size
+                self.window_start_time = pkt_time
+            else:
+                self.current_window.append(pkt)
 
-
-        if self.current_window:
+        if self.current_window and self.window_start_time is not None:
             stats_dict = calculate_window_stats(self.current_window)
-            stats_dict['start_time'] = stats_dict['start_time'].isoformat()
-            stats_dict['end_time'] = stats_dict['end_time'].isoformat()
+            stats_dict['start_time'] = datetime.fromtimestamp(self.window_start_time).isoformat()
+            stats_dict['end_time'] = datetime.fromtimestamp(self.window_start_time + self.window_size).isoformat()
             stats = WindowStats(**stats_dict)
             yield (stats, self.current_window)
 

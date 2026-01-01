@@ -18,10 +18,6 @@ class ARPSpoofDetector(BaseDetectionModel):
                 sender_mac = pkt[ARP].hwsrc
                 sender_ip = pkt[ARP].psrc
                 if sender_mac and sender_ip:
-                    if sender_mac in self.mac_ip_map and self.mac_ip_map[sender_mac] != sender_ip:
-                        logger.warning(f"MAC {sender_mac} previously mapped to {self.mac_ip_map[sender_mac]}, now {sender_ip}")
-                    if sender_ip in self.ip_mac_map and self.ip_mac_map[sender_ip] != sender_mac:
-                        logger.warning(f"IP {sender_ip} previously mapped to {self.ip_mac_map[sender_ip]}, now {sender_mac}")
                     self.mac_ip_map[sender_mac] = sender_ip
                     self.ip_mac_map[sender_ip] = sender_mac
 
@@ -33,16 +29,7 @@ class ARPSpoofDetector(BaseDetectionModel):
             if ARP in pkt:
                 sender_mac = pkt[ARP].hwsrc
                 sender_ip = pkt[ARP].psrc
-                if sender_mac in self.mac_ip_map and self.mac_ip_map[sender_mac] != sender_ip:
-                    detections.append(Detection(
-                        model_name=self.model_name,
-                        timestamp=window_stats.end_time,
-                        severity=0.9,
-                        score=1.0,
-                        label="ARP Cache Poisoning Suspect",
-                        justification=f"MAC {sender_mac} changed IP from {self.mac_ip_map[sender_mac]} to {sender_ip}",
-                        evidence={"mac": sender_mac, "old_ip": self.mac_ip_map[sender_mac], "new_ip": sender_ip}
-                    ))
+                
                 if pkt[ARP].op == 2 and pkt[ARP].psrc == pkt[ARP].pdst:
                     gratuitous_arp_count[sender_ip] += 1
 

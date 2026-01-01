@@ -30,17 +30,27 @@ class DDoSDetector(BaseDetectionModel):
     def analyze(self, window_stats: WindowStats, window_packets: List[Packet]) -> List[Detection]:
         detections: List[Detection] = []
         
-      
         self.update_baseline(window_stats, window_packets)
 
-       
+        current_pps = self.pps_history[-1] if self.pps_history else 0.0
+        current_entropy = self.entropy_history[-1] if self.entropy_history else 0.0
+
+        # --- FIX: Handle Cold Start (First 20 Windows) ---
         if len(self.pps_history) < 20:
+            # Static Threshold Fallback
+            STATIC_PPS_THRESHOLD = 2000.0 
+            if current_pps > STATIC_PPS_THRESHOLD:
+                detections.append(Detection(
+                    model_name=self.model_name,
+                    timestamp=getattr(window_stats, "end_time", None),
+                    severity=1.0,
+                    score=current_pps,
+                    label="High Volume Anomaly (Static Threshold)",
+                    justification=f"Immediate Spike detected: {current_pps:.1f} PPS (Cold Start)",
+                    evidence={"current_pps": current_pps, "threshold": STATIC_PPS_THRESHOLD}
+                ))
             return detections
 
-        current_pps = self.pps_history[-1]
-        current_entropy = self.entropy_history[-1]
-
-        
         pps_list = list(self.pps_history)[:-1]
         if not pps_list: return detections
         
@@ -48,7 +58,7 @@ class DDoSDetector(BaseDetectionModel):
         mean_pps = float(np.mean(pps_array))
         std_pps = float(np.std(pps_array))
         
-        if std_pps == 0.0: std_pps = 1.0 # تجنب القسمة على صفر
+        if std_pps == 0.0: std_pps = 1.0 
 
         pps_z_score = (current_pps - mean_pps) / std_pps
         pps_threshold = float(self.config.params.get("pps_z_threshold", 5.0))
@@ -64,7 +74,6 @@ class DDoSDetector(BaseDetectionModel):
                 evidence={"current_pps": current_pps, "mean_pps": mean_pps, "z_score": pps_z_score}
             ))
 
-        
         entropy_array = np.array(list(self.entropy_history)[:-1], dtype=float)
         if entropy_array.size > 0:
             mean_entropy = float(np.mean(entropy_array))
