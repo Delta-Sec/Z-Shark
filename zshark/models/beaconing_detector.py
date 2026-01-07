@@ -83,7 +83,7 @@ class BeaconingDetector(BaseDetectionModel):
 
                 if peak_magnitude > self.fft_threshold:
                     detections.append(Detection(
-                        model_name=self.model_name,
+                        engine_name=self.engine_name,
                         timestamp=getattr(window_stats, "end_time", None),
                         severity=min(1.0, peak_magnitude / self.fft_threshold),
                         score=peak_magnitude,

@@ -19,10 +19,10 @@ def load_models(config: ZSharkConfig) -> List[BaseDetectionModel]:
     loaded_models: List[BaseDetectionModel] = []
     default_config = ZSharkConfig.default()
 
-    for model_name, model_class in MODEL_REGISTRY.items():
-        model_config = config.models.get(model_name)
+    for engine_name, model_class in MODEL_REGISTRY.items():
+        model_config = config.models.get(engine_name)
         if model_config is None:
-            model_config = default_config.models.get(model_name, ModelConfig())
+            model_config = default_config.models.get(engine_name, ModelConfig())
         if model_config.enabled:
             loaded_models.append(model_class(model_config))
 

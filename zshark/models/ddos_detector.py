@@ -54,7 +54,7 @@ class DDoSDetector(BaseDetectionModel):
 
         if pps_z_score > pps_threshold:
             detections.append(Detection(
-                model_name=self.model_name,
+                engine_name=self.engine_name,
                 timestamp=getattr(window_stats, "end_time", None),
                 severity=min(1.0, (pps_z_score - pps_threshold) / max(pps_threshold, 1.0)),
                 score=pps_z_score,
@@ -69,7 +69,7 @@ class DDoSDetector(BaseDetectionModel):
           
             if current_entropy < mean_entropy * 0.5 and mean_entropy > 1.0:
                 detections.append(Detection(
-                    model_name=self.model_name,
+                    engine_name=self.engine_name,
                     timestamp=getattr(window_stats, "end_time", None),
                     severity=0.8,
                     score=current_entropy,

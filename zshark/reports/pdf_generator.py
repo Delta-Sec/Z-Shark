@@ -245,7 +245,7 @@ def generate_pdf_report(analysis_json_path: str, pdf_output_path: str):
             Paragraph(datetime.fromisoformat(det['timestamp']).strftime("%H:%M:%S"), styles['Normal']),
             Paragraph(sev, severity_style),
             Paragraph(det.get('label','N/A'), styles['Normal']),
-            Paragraph(det.get('model_name', det.get('model','N/A')), styles['Normal']),
+            Paragraph(det.get('engine_name', det.get('model','N/A')), styles['Normal']),
             justification_paragraph
         ]
         table_data.append(row)

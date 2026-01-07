@@ -36,7 +36,7 @@ class ARPSpoofDetector(BaseDetectionModel):
                 known_mac = self.ip_mac_map[sender_ip]
                 if known_mac != sender_mac:
                     detections.append(Detection(
-                        model_name=self.model_name,
+                        engine_name=self.engine_name,
                         timestamp=getattr(window_stats, "end_time", None),
                         severity=1.0,
                         score=1.0,
@@ -55,7 +55,7 @@ class ARPSpoofDetector(BaseDetectionModel):
         for ip, count in gratuitous_arp_count.items():
             if count > self.max_gratuitous_arp:
                 detections.append(Detection(
-                    model_name=self.model_name,
+                    engine_name=self.engine_name,
                     timestamp=getattr(window_stats, "end_time", None),
                     severity=min(1.0, (count - self.max_gratuitous_arp)/5.0),
                     score=count,

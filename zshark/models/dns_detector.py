@@ -72,7 +72,7 @@ class DNSAnomalyDetector(BaseDetectionModel):
                             
                             if entropy > self.entropy_threshold:
                                 detections.append(Detection(
-                                    model_name=self.model_name,
+                                    engine_name=self.engine_name,
                                     timestamp=getattr(window_stats, "end_time", None),
                                     severity=min(1.0, entropy / 5.0),
                                     score=entropy,

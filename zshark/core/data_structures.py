@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class Detection(BaseModel):
-    model_name: str = Field(..., description="Name of the mathematical model that triggered the detection.")
+    engine_name: str = Field(..., description="Name of the mathematical model that triggered the detection.")
     timestamp: datetime = Field(..., description="Timestamp of the packet/window that triggered the detection.")
     severity: float = Field(..., description="Severity score from 0.0 (low) to 1.0 (critical).")
     score: float = Field(..., description="Raw score from the model (e.g., Z-score, Entropy value).")
@@ -45,7 +45,7 @@ class AnalysisResult(BaseModel):
     total_bytes: int
     detections: List[Detection] = Field(default_factory=list)
     summary_stats: Dict[str, Any] = Field(default_factory=dict)
-    model_stats: Dict[str, Any] = Field(default_factory=dict)
+    analysis_stats: Dict[str, Any] = Field(default_factory=dict)
     window_stats: List[WindowStats] = Field(default_factory=list, description="List of per-window statistics")
     top_source_ips: List[Dict[str, Any]] = Field(default_factory=list, description="Top N source IPs by packet count")
     top_dest_ports: List[Dict[str, Any]] = Field(default_factory=list, description="Top N destination ports by packet "

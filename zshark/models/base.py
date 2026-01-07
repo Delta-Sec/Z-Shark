@@ -7,7 +7,7 @@ class BaseDetectionModel(ABC):
 
     def __init__(self, config: ModelConfig):
         self.config = config
-        self.model_name = self.__class__.__name__
+        self.engine_name = self.__class__.__name__
 
     @abstractmethod
     def analyze(self, window_stats: WindowStats, window_packets: List[Packet]) -> List[Detection]:

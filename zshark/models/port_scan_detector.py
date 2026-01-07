@@ -53,7 +53,7 @@ class PortScanDetector(BaseDetectionModel):
                 score = unique_ports_count
                 severity = min(1.0, (unique_ports_count - self.min_unique_ports) / 20.0)
                 detections.append(Detection(
-                    model_name=self.model_name,
+                    engine_name=self.engine_name,
                     timestamp=window_stats.end_time,
                     severity=severity,
                     score=score,
