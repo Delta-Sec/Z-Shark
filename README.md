@@ -11,9 +11,7 @@
   <br>
   <img src="https://img.shields.io/badge/Author-Delta--Security-red?style=flat-square" alt="Author Delta-Security">
 </p>
-
 ---
-
 <details>
 <summary><strong>Table of Contents</strong></summary>
 <ol>
