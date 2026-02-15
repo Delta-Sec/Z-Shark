@@ -153,7 +153,6 @@ python -m zshark.cli.main report results/capture_analysis.json --pdf-path report
 ```
  * **Output:** A professional PDF report with charts, evidence tables, and justifications.
 
-
 3) **Quick Statistical Summary**
 
 (Placeholder/Beta) Get a quick overview of top talkers and protocols.
