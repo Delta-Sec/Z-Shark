@@ -4,48 +4,114 @@ on:
   issue_comment:
     types: [created]
   issues:
-    types: [opened, closed, reopened]
+    types: [opened, closed, reopened, assigned]
 
 jobs:
   notify-teams:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Notification to Teams Channel
+      - name: Send Rich Adaptive Card to Teams
         env:
           TEAMS_WEBHOOK: ${{ secrets.IMS_WEBHOOK }}
           EVENT_TYPE: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_STATE: ${{ github.event.issue.state }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
           SENDER: ${{ github.actor }}
+          ASSIGNEE: ${{ github.event.issue.assignee.login }}
+          LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           ACTION: ${{ github.event.action }}
         run: |
+          # 1. تحديد قيم افتراضية للحقول
+          BODY_TEXT="${ISSUE_BODY:-No description provided.}"
+          ASSIGNEE_TEXT="${ASSIGNEE:-Unassigned}"
+          LABELS_TEXT="${LABELS:-None}"
+          
+          # 2. إعداد تفاصيل الحدث (هل هو تعليق أم تغيير حالة/إنشاء)
           if [ "$EVENT_TYPE" == "issue_comment" ]; then
-            TEXT="**New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
+            CARD_TITLE="💬 New Comment on Issue #$ISSUE_NUMBER"
+            SUB_TEXT="**@$SENDER** commented:\n\n> $COMMENT_BODY"
           else
-            TEXT="**Issue status updated ($ACTION) by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
+            CARD_TITLE="📌 Issue #$ISSUE_NUMBER ($ACTION)"
+            SUB_TEXT="**Status changed to:** \`$ISSUE_STATE\` by @$SENDER"
           fi
 
-          PAYLOAD=$(jq -n --arg text "$TEXT" '{
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "contentUrl": null,
-                "content": {
-                  "$schema": "http://adaptivecards.io/schemas/adaptivecard.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.4",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "text": $text,
-                      "wrap": true
-                    }
-                  ]
+          # 3. بناء الـ Adaptive Card المنسقة Rich Card Payload
+          PAYLOAD=$(jq -n \
+            --arg title "$CARD_TITLE" \
+            --arg issueTitle "$ISSUE_TITLE" \
+            --arg issueUrl "$ISSUE_URL" \
+            --arg subText "$SUB_TEXT" \
+            --arg body "$BODY_TEXT" \
+            --arg state "$ISSUE_STATE" \
+            --arg assignee "$ASSIGNEE_TEXT" \
+            --arg labels "$LABELS_TEXT" \
+            '{
+              "type": "message",
+              "attachments": [
+                {
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptivecard.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [
+                      {
+                        "type": "TextBlock",
+                        "text": $title,
+                        "weight": "Bolder",
+                        "size": "Medium",
+                        "color": "Accent"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "[\($issueTitle)](\($issueUrl))",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "wrap": true
+                      },
+                      {
+                        "type": "FactSet",
+                        "facts": [
+                          { "title": "Status:", "value": $state },
+                          { "title": "Assignee:", "value": $assignee },
+                          { "title": "Labels/Priority:", "value": $labels }
+                        ]
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "**Description / Content:**",
+                        "weight": "Bolder",
+                        "spacing": "Medium"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": $body,
+                        "wrap": true,
+                        "isSubtle": true
+                      },
+                      {
+                        "type": "Separator"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": $subText,
+                        "wrap": true
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "View Issue on GitHub",
+                        "url": $issueUrl
+                      }
+                    ]
+                  }
                 }
-              }
-            ]
-          }')
+              ]
+            }')
 
           curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
