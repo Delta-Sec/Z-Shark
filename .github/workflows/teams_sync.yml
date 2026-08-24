@@ -1,0 +1,31 @@
+name: Sync GitHub Issues to Teams
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, closed, reopened]
+
+jobs:
+  notify-teams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Notification to Teams Channel
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.IMS_WEBHOOK }}
+          EVENT_TYPE: ${{ github.event_name }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          SENDER: ${{ github.actor }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          if [ "$EVENT_TYPE" == "issue_comment" ]; then
+            MESSAGE=" **New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
+          else
+            MESSAGE=" **Issue $ACTION by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
+          fi
+
+          PAYLOAD=$(jq -n --arg msg "$MESSAGE" '{text: $msg}')
+
+          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
