@@ -25,27 +25,29 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
           ACTION: ${{ github.event.action }}
         run: |
-          # 1. Clean and escape issue/comment body strings
-          SAFE_BODY=$(jq -n --arg b "${ISSUE_BODY:-No description provided.}" '$b')
+          # 1. تنظيف القيم وتجنب السطور الجديدة والقيم الفارغة
+          CLEAN_BODY=$(echo "$ISSUE_BODY" | tr -d '\r' | sed 's/"/\\"/g' | tr '\n' ' ')
+          CLEAN_COMMENT=$(echo "$COMMENT_BODY" | tr -d '\r' | sed 's/"/\\"/g' | tr '\n' ' ')
+          
+          BODY_TEXT="${CLEAN_BODY:-No description provided.}"
           ASSIGNEE_TEXT="${ASSIGNEE:-Unassigned}"
           LABELS_TEXT="${LABELS:-None}"
 
-          # 2. Format header and event description
           if [ "$EVENT_TYPE" == "issue_comment" ]; then
-            CARD_TITLE="New Comment on Issue #$ISSUE_NUMBER"
-            SUB_TEXT="**@$SENDER** commented:\n\n> $COMMENT_BODY"
+            CARD_TITLE="💬 New Comment on Issue #$ISSUE_NUMBER"
+            SUB_TEXT="**@$SENDER** commented: $CLEAN_COMMENT"
           else
-            CARD_TITLE="Issue #$ISSUE_NUMBER ($ACTION)"
-            SUB_TEXT="**Status changed to:** \`$ISSUE_STATE\` by @$SENDER"
+            CARD_TITLE="📌 Issue #$ISSUE_NUMBER ($ACTION)"
+            SUB_TEXT="**Status:** \`$ISSUE_STATE\` | **Updated by:** @$SENDER"
           fi
 
-          # 3. Build standalone Adaptive Card payload for Power Automate triggerOutputs()?['body']
+          # 2. بناء Adaptive Card متوافق 100% مع Teams Bot Framework
           PAYLOAD=$(jq -n \
             --arg title "$CARD_TITLE" \
             --arg issueTitle "$ISSUE_TITLE" \
             --arg issueUrl "$ISSUE_URL" \
             --arg subText "$SUB_TEXT" \
-            --argjson body "$SAFE_BODY" \
+            --arg body "$BODY_TEXT" \
             --arg state "$ISSUE_STATE" \
             --arg assignee "$ASSIGNEE_TEXT" \
             --arg labels "$LABELS_TEXT" \
@@ -69,32 +71,33 @@ jobs:
                   "wrap": true
                 },
                 {
-                  "type": "FactSet",
-                  "facts": [
-                    { "title": "Status:", "value": $state },
-                    { "title": "Assignee:", "value": $assignee },
-                    { "title": "Labels / Priority:", "value": $labels }
+                  "type": "TextBlock",
+                  "text": "📋 **Status:** \($state)  |  👤 **Assignee:** \($assignee)  |  🏷️ **Labels:** \($labels)",
+                  "wrap": true,
+                  "spacing": "Small"
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "**Description:**",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": $body,
+                      "wrap": true,
+                      "isSubtle": true
+                    }
                   ]
                 },
                 {
                   "type": "TextBlock",
-                  "text": "**Description:**",
-                  "weight": "Bolder",
-                  "spacing": "Medium"
-                },
-                {
-                  "type": "TextBlock",
-                  "text": $body,
-                  "wrap": true,
-                  "isSubtle": true
-                },
-                {
-                  "type": "Separator"
-                },
-                {
-                  "type": "TextBlock",
                   "text": $subText,
-                  "wrap": true
+                  "wrap": true,
+                  "spacing": "Medium"
                 }
               ],
               "actions": [
