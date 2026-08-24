@@ -21,11 +21,32 @@ jobs:
           ACTION: ${{ github.event.action }}
         run: |
           if [ "$EVENT_TYPE" == "issue_comment" ]; then
-            MESSAGE=" **New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
+            TEXT="💬 **New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
           else
-            MESSAGE=" **Issue $ACTION by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
+            TEXT="📌 **Issue status updated ($ACTION) by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
           fi
 
-          PAYLOAD=$(jq -n --arg msg "$MESSAGE" '{text: $msg}')
+          # Modern Adaptive Card Payload expected by Power Automate Teams Action
+          PAYLOAD=$(jq -n --arg text "$TEXT" '{
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "contentUrl": null,
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptivecard.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "text": $text,
+                      "wrap": true
+                    }
+                  ]
+                }
+              }
+            ]
+          }')
 
-          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
+          curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
