@@ -25,18 +25,21 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
           ACTION: ${{ github.event.action }}
         run: |
+          # 1. Clean and escape issue/comment body strings
           SAFE_BODY=$(jq -n --arg b "${ISSUE_BODY:-No description provided.}" '$b')
           ASSIGNEE_TEXT="${ASSIGNEE:-Unassigned}"
           LABELS_TEXT="${LABELS:-None}"
 
+          # 2. Format header and event description
           if [ "$EVENT_TYPE" == "issue_comment" ]; then
-            CARD_TITLE="💬 New Comment on Issue #$ISSUE_NUMBER"
+            CARD_TITLE="New Comment on Issue #$ISSUE_NUMBER"
             SUB_TEXT="**@$SENDER** commented:\n\n> $COMMENT_BODY"
           else
-            CARD_TITLE="📌 Issue #$ISSUE_NUMBER ($ACTION)"
+            CARD_TITLE="Issue #$ISSUE_NUMBER ($ACTION)"
             SUB_TEXT="**Status changed to:** \`$ISSUE_STATE\` by @$SENDER"
           fi
 
+          # 3. Build standalone Adaptive Card payload for Power Automate triggerOutputs()?['body']
           PAYLOAD=$(jq -n \
             --arg title "$CARD_TITLE" \
             --arg issueTitle "$ISSUE_TITLE" \
