@@ -21,12 +21,11 @@ jobs:
           ACTION: ${{ github.event.action }}
         run: |
           if [ "$EVENT_TYPE" == "issue_comment" ]; then
-            TEXT="💬 **New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
+            TEXT="**New Comment by @$SENDER** on issue: [$ISSUE_TITLE]($ISSUE_URL)\n\n> $COMMENT_BODY"
           else
-            TEXT="📌 **Issue status updated ($ACTION) by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
+            TEXT="**Issue status updated ($ACTION) by @$SENDER**: [$ISSUE_TITLE]($ISSUE_URL)"
           fi
 
-          # Modern Adaptive Card Payload expected by Power Automate Teams Action
           PAYLOAD=$(jq -n --arg text "$TEXT" '{
             "type": "message",
             "attachments": [
